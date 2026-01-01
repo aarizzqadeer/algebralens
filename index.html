@@ -4,8 +4,6 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Algebra Lens</title>
-<link rel="icon" href="favicon.ico" type="image/svg+xml" />
- <meta name="theme-color" content="#1e40af" />
 <style>
 :root {
 --bg:#0f1724;
@@ -260,8 +258,78 @@ box-shadow: 0 1px 4px rgba(192,132,252,0.18);
 </style>
 </head>
 <body>
+	<div class="app" role="application" aria-label="Algebra Lens">
 
-<div class="app" role="application" aria-label="Algebra Lens">
+		<!-- LEFT PANEL (logo + description only) -->
+		<div class="panel" id="leftPanel">
+			<div class="header">
+				<div class="logo">AL</div>
+				<div>
+					<h1>Algebra Lens</h1>
+					<p class="lead">Solve and visualize linear equations.</p>
+				</div>
+			</div>
+		</div> 
+		<!-- END LEFT PANEL -->
+
+
+		<!-- MAIN AREA (your under-construction message goes here) -->
+		<div class="mainContent">
+			 <b><h1>🚧 This Site Is Under Construction 🚧</h1></b>
+
+    <p>
+        The Linear Equation Solver you know is getting a major upgrade. While the main tools are being expanded,
+        improved, and reorganized, this temporary page is here to let you know what’s coming next. A whole set of
+        new math utilities is on the way, designed to make calculations faster, easier, and more intuitive.
+    </p>
+
+    <h2>Upcoming Features</h2>
+
+    <ul>
+        <li>• <strong>Simple Calculator</strong> — A clean, fast calculator for basic operations like addition,
+            subtraction, multiplication, and division. Perfect for quick calculations without switching apps.</li>
+
+        <li>• <strong>Modulus Function Solver</strong> — Enter modulus expressions and get instant results, with
+            explanations and step-by-step breakdowns.</li>
+
+        <li>• <strong>Modulus Graphing Tool</strong> — Visualize modulus functions on a graph to better understand
+            their shape, symmetry, and behavior.</li>
+
+        <li>• <strong>Quadratic Equation Solver</strong> — Solve any quadratic equation with detailed steps,
+            discriminant analysis, and solution classification (real, repeated, or complex roots).</li>
+
+        <li>• <strong>Quadratic Graphing Tool</strong> — Plot parabolas instantly, view vertex, axis of symmetry,
+            intercepts, and see how changes in coefficients affect the graph.</li>
+    </ul>
+
+    <h2>What This Means</h2>
+
+    <p>
+        The goal is to transform this site from a single-purpose tool into a full mini math hub. Whether you’re solving
+        equations, checking graphs, or doing quick calculations, everything will be in one place — simple, clean, and
+        easy to use.
+    </p>
+
+    <h2>More Tools Coming Soon</h2>
+
+    <p>
+        This is just the beginning. After these updates, more math utilities and interactive tools will be added to
+        expand the site even further. The next version will be more powerful, more organized, and more helpful for
+        students, teachers, and anyone who needs quick math solutions.
+    </p>
+
+    <p>
+        Thank you for your patience. The new features are on the way.
+    </p>
+
+		</div>
+
+	</div>
+</body>
+
+
+
+<!--<div class="app" role="application" aria-label="Algebra Lens">
 <div class="panel" id="leftPanel">
 <div class="header">
 <div class="logo">AL</div>
@@ -270,14 +338,14 @@ box-shadow: 0 1px 4px rgba(192,132,252,0.18);
 <p class="lead">Solve and visualize linear equations.</p>
 </div>
 </div>
-
+	
 <label>Enter your equation below</label>
 
 <input id="equationInput" type="text" placeholder="Enter equation here"
 style="width:100%;padding:12px;font-size:18px;margin-bottom:8px;font-family:'STIX Two Math',
 'Cambria Math', 'Latin Modern Math', 'DejaVu Sans', 'Arial', serif; letter-spacing:1px;" />
 <button class="btn" id="solveBtn" style="width:100%;">Solve</button>
-<!-- Numeric Keyboard -->
+
 <div id="numKeyboard" class="math-keyboard">
 <button type="button" class="btn mathkey" data-key="7">7</button>
 <button type="button" class="btn mathkey" data-key="8">8</button>
@@ -320,7 +388,7 @@ zooming.</footer>
 <button id="zoomOutBtn" class="gbtn" title="Zoom out">-</button>
 <button id="resetViewBtn" class="gbtn reset" title="Reset view">Reset</button>
 <button id="zoomInBtn" class="gbtn" title="Zoom in">+</button>
-<!-- coordinate readout removed -->
+
 </div>
 <div class="legend">
 <div style="display:flex;align-items:center;gap:6px">
@@ -1311,5 +1379,6 @@ equationInput.focus();
 // Start with empty graph (no equation plotted)
 state.problem = null;
 drawGraph();
-</script>
-</body>
+</script>--> 
+</body> 
+</html>
