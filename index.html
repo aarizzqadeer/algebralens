@@ -4,6 +4,1385 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Algebra Lens</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">	
+<style>
+:root {
+--bg:#0f1724;
+--panel:#0b1220;
+--muted:#9aa6b2;
+--accent:#7dd3fc;
+--accent-2:#c084fc;
+--success:#34d399;
+--danger:#fb7185;
+--glass: rgba(255,255,255,0.03);
+}
+* { box-sizing:border-box }
+html, body {
+height:100%;
+margin:0;
+font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;
+background:linear-gradient(180deg,#071021 0%, #07162b 60%);
+color:#e6eef6;
+}
+.app {
+display:grid;
+grid-template-columns:420px 1fr;
+gap:20px;
+
+padding:28px;
+height:100vh;
+align-items:stretch;
+}
+/* Left panel controls */
+.panel {
+background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+border-radius:12px;
+padding:18px;
+box-shadow: 0 6px 24px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+display:flex;
+flex-direction:column;
+gap:12px;
+min-height:0;
+}
+.header {
+display:flex;
+gap:10px;
+align-items:center;
+}
+.logo {
+width:48px;
+height:48px;
+border-radius:10px;
+background:linear-gradient(135deg,var(--accent),var(--accent-2));
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:700;
+
+color:#031022;
+box-shadow: 0 6px 18px rgba(125,211,252,0.08);
+}
+h1 { font-size:18px; margin:0 }
+p.lead { margin:0; color:var(--muted); font-size:13px }
+label {
+font-size:13px;
+color:var(--muted);
+display:block;
+margin-top:8px;
+}
+select, input[type="text"], .btn, .controls, .slider-row { width:100%; }
+.controls { display:flex; gap:8px }
+.btn {
+background:linear-gradient(90deg,var(--accent),var(--accent-2));
+border:none;
+color:#031022;
+padding:8px 12px;
+border-radius:8px;
+font-weight:600;
+cursor:pointer;
+box-shadow: 0 6px 16px rgba(16,24,40,0.3);
+}
+.btn.ghost {
+background:transparent;
+border:1px solid rgba(255,255,255,0.06);
+color:var(--muted);
+}
+.row { display:flex; gap:8px }
+
+.problem {
+background:var(--glass);
+padding:12px;
+border-radius:10px;
+font-weight:600;
+font-size:15px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+}
+.small { font-size:13px; color:var(--muted) }
+.slider {
+display:flex;
+flex-direction:column;
+gap:6px;
+padding:8px;
+background:rgba(255,255,255,0.01);
+border-radius:8px;
+}
+input[type=range] { width:100% }
+/* history removed */
+.hint {
+font-size:13px;
+color:var(--muted);
+padding:8px;
+border-radius:8px;
+background:rgba(255,255,255,0.01);
+}
+input[type="text"] {
+
+padding:10px;
+border-radius:8px;
+border:1px solid rgba(255,255,255,0.15);
+background:rgba(255,255,255,0.05);
+color:inherit;
+outline:none;
+transition:all 0.2s;
+}
+input[type="text"]:focus {
+background:rgba(255,255,255,0.1);
+border-color:rgba(255,255,255,0.3);
+box-shadow:0 0 0 3px rgba(125,211,252,0.1);
+}
+.check-result {
+padding:8px;
+border-radius:8px;
+font-weight:700;
+text-align:center;
+}
+/* Right panel: canvas */
+.canvas-panel {
+background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+border-radius:12px;
+padding:16px;
+display:flex;
+flex-direction:column;
+gap:12px;
+min-height:0;
+}
+
+.graph-header { display:flex; justify-content:space-between; align-items:center; gap:8px }
+.legend { display:flex; gap:8px; align-items:center }
+.graph-controls { display:flex; gap:8px; align-items:center }
+.graph-controls .gbtn { background:transparent; border:1px solid rgba(255,255,255,0.06); color:var(--
+muted); padding:6px 8px; border-radius:8px; cursor:pointer; font-weight:700 }
+.graph-controls .gbtn.reset { background:linear-gradient(90deg,var(--accent),var(--accent-2));
+color:#031022; border:none; box-shadow: 0 6px 14px rgba(16,24,40,0.3); padding:8px 12px }
+.legend .dot { width:12px; height:12px; border-radius:3px }
+.dot.line { background:linear-gradient(90deg,var(--accent),#60a5fa) }
+.dot.hline { background:linear-gradient(90deg,var(--accent-2),#f472b6) }
+.dot.axis { background:#000000 }
+canvas {
+width:100%;
+height:72vh;
+border-radius:10px;
+background: #ffffff;
+display:block;
+touch-action: none;
+}  
+footer.small {
+font-size:12px;
+color:var(--muted);
+text-align:center;
+margin-top:auto;
+}
+/* animation helpers */
+.pulse { animation: pulse 1200ms ease-in-out; }
+@keyframes pulse {
+0% { transform:scale(0.98); opacity:0.8 }
+50% { transform:scale(1.02); opacity:1 }
+
+100% { transform:scale(1); opacity:1 }
+}
+/* responsive */
+@media(max-width:980px){
+.app { grid-template-columns:1fr; padding:12px }
+canvas { height:60vh }
+.math-keyboard { max-width: 95%; grid-template-columns: repeat(5, 1fr); padding: 10px; gap:8px; }
+.math-keyboard .mathkey { padding: 12px 6px; font-size:1.1em; min-height:48px; width:100% !important; }
+}
+/* Math Keyboard Standout */
+.math-keyboard {
+display: grid;
+grid-template-columns: repeat(4, 1fr);
+gap: 10px;
+margin: 18px 0 0 0;
+background: linear-gradient(90deg, #232b4a 60%, #2d375a 100%);
+border-radius: 14px;
+box-shadow: 0 4px 24px 0 rgba(125,211,252,0.13), 0 1.5px 0 #7dd3fc;
+padding: 14px 10px 10px 10px;
+border: 2px solid #7dd3fc;
+max-width: 370px;
+margin-left: auto;
+margin-right: auto;
+}
+.math-keyboard .mathkey {
+font-family: 'STIX Two Math', 'Cambria Math', 'Latin Modern Math', 'DejaVu Sans', 'Arial', serif;
+font-size: 1.25em;
+font-weight: 700;
+background: linear-gradient(90deg, #7dd3fc 60%, #c084fc 100%);
+color: #031022;
+border: none;
+border-radius: 8px;
+box-shadow: 0 2px 8px rgba(125,211,252,0.13);
+margin: 0;
+padding: 12px 0;
+transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+cursor: pointer;
+width: 100% !important;
+min-height: 48px;
+} 
+.math-keyboard .mathkey:active {
+background: linear-gradient(90deg, #c084fc 60%, #7dd3fc 100%);
+color: #fff;
+box-shadow: 0 1px 4px rgba(192,132,252,0.18);
+}
+/* Loading spinners */
+.spinner-overlay {
+	position: absolute;
+	inset: 0;
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	background: rgba(2,6,23,0.35);
+	border-radius:10px;
+	z-index:10;
+}
+.spinner { width:48px; height:48px; border-radius:50%; border:6px solid rgba(255,255,255,0.12); border-top-color:var(--accent); animation: spin 900ms linear infinite }
+@keyframes spin { to { transform: rotate(360deg) } }
+.dots { font-weight:700; color:var(--muted); }
+.dots::after { content: '...'; animation: dots 1s steps(3,end) infinite }
+@keyframes dots { 0%,20%{color:transparent} 40%{color:inherit} 100%{color:inherit} }
+
+/* Home screen overlay */
+.home-screen {
+	position:fixed;
+	left:0;right:0;top:0;bottom:0;
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	background:linear-gradient(180deg, rgba(2,6,23,0.9), rgba(2,6,23,0.95));
+	z-index:50;
+}
+.home-card { width:720px; max-width:95%; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); padding:28px; border-radius:12px; box-shadow:0 8px 40px rgba(2,6,23,0.6); }
+.home-card h2 { margin:0 0 8px 0 }
+.home-actions { display:flex; gap:12px; margin-top:16px }
+.home-actions .btn { flex:1 }
+</style>
+</head>
+<body>
+	<div class="app" role="application" aria-label="Algebra Lens">
+
+		<!-- LEFT PANEL (logo + description only) -->
+		<div class="panel" id="leftPanel">
+			<div class="header">
+				<div class="logo">AL</div>
+				<div>
+					<h1>Algebra Lens</h1>
+					<p class="lead">Solve and visualize linear equations.</p>
+				</div>
+			</div>
+		</div> 
+		<!-- END LEFT PANEL -->
+
+
+		<!-- MAIN AREA (your under-construction message goes here) -->
+		<div class="mainContent">
+			 <b><h1>🚧 This Site Is Under Construction 🚧</h1></b>
+
+    <p>
+        The Linear Equation Solver you know is getting a major upgrade. While the main tools are being expanded,
+        improved, and reorganized, this temporary page is here to let you know what’s coming next. A whole set of
+        new math utilities is on the way, designed to make calculations faster, easier, and more intuitive.
+    </p>
+
+    <h2>Upcoming Features</h2>
+
+    <ul>
+        <li>• <strong>Simple Calculator</strong> — A clean, fast calculator for basic operations like addition,
+            subtraction, multiplication, and division. Perfect for quick calculations without switching apps.</li>
+
+        <li>• <strong>Modulus Function Solver</strong> — Enter modulus expressions and get instant results, with
+            explanations and step-by-step breakdowns.</li>
+
+        <li>• <strong>Modulus Graphing Tool</strong> — Visualize modulus functions on a graph to better understand
+            their shape, symmetry, and behavior.</li>
+
+        <li>• <strong>Quadratic Equation Solver</strong> — Solve any quadratic equation with detailed steps,
+            discriminant analysis, and solution classification (real, repeated, or complex roots).</li>
+
+        <li>• <strong>Quadratic Graphing Tool</strong> — Plot parabolas instantly, view vertex, axis of symmetry,
+            intercepts, and see how changes in coefficients affect the graph.</li>
+    </ul>
+
+    <h2>What This Means</h2>
+
+    <p>
+        The goal is to transform this site from a single-purpose tool into a full mini math hub. Whether you’re solving
+        equations, checking graphs, or doing quick calculations, everything will be in one place — simple, clean, and
+        easy to use.
+    </p>
+
+    <h2>More Tools Coming Soon</h2>
+
+    <p>
+        This is just the beginning. After these updates, more math utilities and interactive tools will be added to
+        expand the site even further. The next version will be more powerful, more organized, and more helpful for
+        students, teachers, and anyone who needs quick math solutions.
+    </p>
+
+    <p>
+        Thank you for your patience. The new features are on the way.
+    </p>
+
+		</div>
+
+	</div>
+</body>
+
+
+
+<!--<div class="app" role="application" aria-label="Algebra Lens">
+<div class="panel" id="leftPanel">
+<div class="header">
+<div class="logo">AL</div>
+<div>
+<h1>Algebra Lens</h1>
+<p class="lead">Solve and visualize linear equations.</p>
+</div>
+</div>
+	
+<label>Enter your equation below</label>
+
+<input id="equationInput" type="text" placeholder="Enter equation here"
+style="width:100%;padding:12px;font-size:18px;margin-bottom:8px;font-family:'STIX Two Math',
+'Cambria Math', 'Latin Modern Math', 'DejaVu Sans', 'Arial', serif; letter-spacing:1px;" />
+<button class="btn" id="solveBtn" style="width:100%;">Solve</button>
+
+<div id="numKeyboard" class="math-keyboard">
+<button type="button" class="btn mathkey" data-key="7">7</button>
+<button type="button" class="btn mathkey" data-key="8">8</button>
+<button type="button" class="btn mathkey" data-key="9">9</button>
+<button type="button" class="btn mathkey" data-key="-">−</button>
+<button type="button" class="btn mathkey" data-key="4">4</button>
+<button type="button" class="btn mathkey" data-key="5">5</button>
+<button type="button" class="btn mathkey" data-key="6">6</button>
+<button type="button" class="btn mathkey" data-key="+">+</button>
+<button type="button" class="btn mathkey" data-key="1">1</button>
+<button type="button" class="btn mathkey" data-key="2">2</button>
+<button type="button" class="btn mathkey" data-key="3">3</button>
+<button type="button" class="btn mathkey" data-key="×">×</button>
+<button type="button" class="btn mathkey" data-key="0">0</button>
+<button type="button" class="btn mathkey" data-key=".">.</button>
+<button type="button" class="btn mathkey" data-key="(">(</button>
+<button type="button" class="btn mathkey" data-key=")">)</button>
+<button type="button" class="btn mathkey" data-key="÷">÷</button>
+<button type="button" class="btn mathkey" data-key="/">/</button>
+<button type="button" class="btn mathkey" data-key="=">=</button>
+<button type="button" class="btn mathkey" data-key="var">Var</button>
+<button type="button" class="btn mathkey" data-key="back">Back</button>
+</div>
+
+<div id="problemText" class="small" style="background:var(--glass);padding:12px;
+border-radius:10px;min-height:60px;display:flex;align-items:center;margin-top:12px;"></div>
+
+<div class="hint" id="hintBox">Steps to solve the equation will appear here.</div>
+<footer class="small">Built with HTML/CSS/JS — Explore linear equations by panning and
+zooming.</footer>
+</div>
+
+<div class="canvas-panel">
+<div class="graph-header">
+<div>
+<strong id="graphTitle">Graph</strong>
+<div class="small" id="graphSub">No equation yet</div>
+</div>
+<div class="graph-controls">
+<button id="zoomOutBtn" class="gbtn" title="Zoom out">-</button>
+<button id="resetViewBtn" class="gbtn reset" title="Reset view">Reset</button>
+<button id="zoomInBtn" class="gbtn" title="Zoom in">+</button>
+
+</div>
+<div class="legend">
+<div style="display:flex;align-items:center;gap:6px">
+<div class="dot axis"></div><div class="small" id="legendAxis">Axes</div>
+</div>
+<div style="display:flex;align-items:center;gap:6px">
+<div class="dot line"></div><div class="small" id="legendEq">Equation</div>
+</div>
+<div style="display:flex;align-items:center;gap:6px">
+<div class="dot hline"></div><div class="small" id="legendRef">Reference</div>
+</div>
+</div>
+
+</div>
+<canvas id="graphCanvas" width="800" height="600" role="img" aria-label="Algebra
+graph"></canvas>
+<div id="canvasOverlay" class="spinner-overlay" style="display:none;position:relative;margin:16px;border-radius:10px;">
+	<div class="spinner" aria-hidden="true"></div>
+</div>
+<footer class="small" style="margin-top:16px;text-align:center;">Made with Love ❤️ by Aariz Qadeer</footer>
+<footer class="small" style="margin-top:16px;text-align:center;">Shoutout to my bro Zuhair Arshad fr  </footer>
+</div>
+</div>
+<script>
+/* ================================
+Algebra Lens JS - Readable Format
+Features:
+- Problem generator (linear)
+- Sliders for a, b, c
+- Live graph drawing
+- Answer checking with hints
+================================ */
+
+/* --- Utilities --- */
+function $(id) { return document.getElementById(id); }
+function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+function approxEqual(a, b, tol = 1e-3) { return Math.abs(a - b) <= tol; }
+function parseNumberList(s) {
+return s.split(',')
+.map(x => parseFloat(x.trim()))
+.filter(x => !Number.isNaN(x));
+}
+function randInt(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+function randNonZero(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function roundSmart(x) {
+	// Prefer math.js BigNumber formatting when available
+	try{
+		if(window.math && math.isBigNumber(x)) return math.format(x, {notation: 'auto', precision: 14});
+		if(window.math && typeof x === 'number' && !Number.isFinite(x)) return String(x);
+	}catch(e){}
+	return formatNumber(x);
+}
+
+function formatLinear(a, b, variable = 'x') {
+let aPart;
+if (a === 1) aPart = variable;
+else if (a === -1) aPart = `-${variable}`;
+else aPart = `${roundSmart(a)}${variable}`;
+
+let bPart = '';
+if (Math.abs(b) < 1e-6) bPart = '';
+else if (b > 0) bPart = ` + ${roundSmart(b)}`;
+else bPart = ` - ${roundSmart(Math.abs(b))}`;
+
+return `y = ${aPart}${bPart}`;
+}
+
+/* --- Persistence (save / load) --- */
+function saveAppState(){
+try{
+const toSave = { view: {...view}, problem: state.problem };
+localStorage.setItem('algebraLens', JSON.stringify(toSave));
+}catch(e){ /* ignore storage errors */ }
+}
+
+function loadAppState(){
+try{
+const raw = localStorage.getItem('algebraLens');
+
+if(!raw) return false;
+const obj = JSON.parse(raw);
+if(obj.view) view = obj.view;
+if(obj.problem){
+// restore problem without resetting the view
+setProblem(obj.problem, {resetView:false});
+return true;
+}
+}catch(e){ /* ignore parse errors */ }
+return false;
+}
+
+/* --- State --- */
+const state = {
+mode: 'practice', // practice | explore
+level: 2,
+problem: null // {type:'linear', a,b,c, text, solution}
+};
+
+/* --- UI Elements --- */
+const problemText = $('problemText');
+const hintBox = $('hintBox');
+const graphTitle = $('graphTitle');
+const graphSub = $('graphSub');
+const legendEq = $('legendEq');
+const legendRef = $('legendRef');
+const legendAxis = $('legendAxis');
+const equationInput = $('equationInput');
+const solveBtn = $('solveBtn');
+const numKeyboard = document.getElementById('numKeyboard');
+
+/* --- Canvas Setup --- */
+const canvas = $('graphCanvas');
+const ctx = canvas.getContext('2d');
+let DPR = window.devicePixelRatio || 1;
+
+function resizeCanvas() {
+DPR = window.devicePixelRatio || 1;
+canvas.width = Math.floor(canvas.clientWidth * DPR);
+canvas.height = Math.floor(canvas.clientHeight * DPR);
+}
+
+resizeCanvas();
+window.addEventListener('resize', () => {
+resizeCanvas();
+drawGraph();
+});
+
+// --- Pan & Zoom helpers and interaction ---
+function toWorldX(px){
+return view.xMin + (px / canvas.width) * (view.xMax - view.xMin);
+}
+function toWorldY(py){
+
+return view.yMin + ((canvas.height - py) / canvas.height) * (view.yMax - view.yMin);
+}
+
+function screenToCanvasPixels(clientX, clientY){
+const rect = canvas.getBoundingClientRect();
+return { x: Math.round((clientX - rect.left) * DPR), y: Math.round((clientY - rect.top) * DPR) };
+}
+
+let isPanning = false;
+let panStart = {x:0,y:0};
+let viewStart = {};
+
+canvas.addEventListener('mousedown', (ev)=>{
+isPanning = true;
+panStart = {x: ev.clientX, y: ev.clientY};
+viewStart = {...view};
+canvas.style.cursor = 'grabbing';
+});
+window.addEventListener('mousemove', (ev)=>{
+const rect = canvas.getBoundingClientRect();
+const cp = screenToCanvasPixels(ev.clientX, ev.clientY);
+const wx = toWorldX(cp.x), wy = toWorldY(cp.y);
+
+if(!isPanning) return;
+const dx = (ev.clientX - panStart.x) * DPR;
+const dy = (ev.clientY - panStart.y) * DPR;
+const worldDx = dx * (viewStart.xMax - viewStart.xMin) / canvas.width;
+const worldDy = dy * (viewStart.yMax - viewStart.yMin) / canvas.height;
+
+view.xMin = viewStart.xMin - worldDx;
+view.xMax = viewStart.xMax - worldDx;
+view.yMin = viewStart.yMin + worldDy;
+view.yMax = viewStart.yMax + worldDy;
+drawGraph();
+});
+window.addEventListener('mouseup', ()=>{ isPanning = false; canvas.style.cursor = 'default';
+saveAppState(); });
+
+// touch: simple single-finger pan
+canvas.addEventListener('touchstart', (e)=>{
+if(e.touches.length===1){
+isPanning = true;
+panStart = {x: e.touches[0].clientX, y: e.touches[0].clientY};
+viewStart = {...view};
+}
+});
+canvas.addEventListener('touchmove', (e)=>{
+if(!isPanning || e.touches.length!==1) return;
+const dx = (e.touches[0].clientX - panStart.x) * DPR;
+const dy = (e.touches[0].clientY - panStart.y) * DPR;
+const worldDx = dx * (viewStart.xMax - viewStart.xMin) / canvas.width;
+const worldDy = dy * (viewStart.yMax - viewStart.yMin) / canvas.height;
+view.xMin = viewStart.xMin - worldDx;
+view.xMax = viewStart.xMax - worldDx;
+view.yMin = viewStart.yMin + worldDy;
+view.yMax = viewStart.yMax + worldDy;
+drawGraph();
+e.preventDefault();
+
+}, {passive:false});
+canvas.addEventListener('touchend', ()=>{ isPanning=false; });
+canvas.addEventListener('touchend', ()=>{ isPanning=false; saveAppState(); });
+
+function zoomAt(clientX, clientY, scale){
+const rect = canvas.getBoundingClientRect();
+const cx = (clientX - rect.left) * DPR;
+const cy = (clientY - rect.top) * DPR;
+const wx = toWorldX(cx);
+const wy = toWorldY(cy);
+
+const newWidth = (view.xMax - view.xMin) * scale;
+const newHeight = (view.yMax - view.yMin) * scale;
+
+view.xMin = wx - (wx - view.xMin) * scale;
+view.xMax = view.xMin + newWidth;
+view.yMin = wy - (wy - view.yMin) * scale;
+view.yMax = view.yMin + newHeight;
+
+// optional clamps
+const minWidth = 0.01; const maxWidth = 1000;
+const w = view.xMax - view.xMin;
+if(w < minWidth){ const mid = (view.xMin+view.xMax)/2; view.xMin = mid - minWidth/2; view.xMax =
+mid + minWidth/2; }
+if(w > maxWidth){ const mid = (view.xMin+view.xMax)/2; view.xMin = mid - maxWidth/2; view.xMax =
+mid + maxWidth/2; }
+
+drawGraph();
+saveAppState();
+
+}
+
+canvas.addEventListener('wheel', (ev)=>{
+ev.preventDefault();
+const factor = 1.15;
+const scale = ev.deltaY < 0 ? (1/factor) : factor;
+zoomAt(ev.clientX, ev.clientY, scale);
+}, {passive:false});
+
+// double click reset
+canvas.addEventListener('dblclick', ()=>{
+view = { xMin:-5, xMax:5, yMin:-4, yMax:4 };
+drawGraph();
+});
+
+// hook up buttons
+const zoomInBtn = document.getElementById('zoomInBtn');
+const zoomOutBtn = document.getElementById('zoomOutBtn');
+const resetViewBtn = document.getElementById('resetViewBtn');
+if(zoomInBtn) zoomInBtn.addEventListener('click', (e)=>{ const rect=canvas.getBoundingClientRect();
+zoomAt(rect.left + rect.width/2, rect.top + rect.height/2, 1/1.15); });
+if(zoomOutBtn) zoomOutBtn.addEventListener('click', (e)=>{ const rect=canvas.getBoundingClientRect();
+zoomAt(rect.left + rect.width/2, rect.top + rect.height/2, 1.15); });
+if(resetViewBtn) resetViewBtn.addEventListener('click', (e)=>{ view = { xMin:-5, xMax:5, yMin:-4, yMax:4
+}; drawGraph(); saveAppState(); });
+// double click reset should also persist
+canvas.addEventListener('dblclick', ()=>{ view = { xMin:-5, xMax:5, yMin:-4, yMax:4 }; drawGraph();
+saveAppState(); });
+
+/* --- View / Coordinate Mapping --- */
+
+let view = { xMin:-5, xMax:5, yMin:-4, yMax:4 };
+
+function toCanvasX(x) {
+return (x - view.xMin) / (view.xMax - view.xMin) * canvas.width;
+}
+
+function toCanvasY(y) {
+return canvas.height - (y - view.yMin) / (view.yMax - view.yMin) * canvas.height;
+}
+
+/* --- Drawing Functions --- */
+function clearCanvas() {
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+ctx.fillStyle = '#ffffff';
+ctx.fillRect(0,0,canvas.width,canvas.height);
+}  
+
+function drawAxes() {
+ctx.save();
+ctx.lineWidth = 2.5 * DPR;
+ctx.strokeStyle = '#000000';
+
+// vertical axis
+if (view.xMin <= 0 && view.xMax >= 0) {
+ctx.beginPath();
+ctx.moveTo(toCanvasX(0),0);
+ctx.lineTo(toCanvasX(0),canvas.height);
+ctx.stroke();
+}
+
+// horizontal axis
+if (view.yMin <= 0 && view.yMax >= 0) {
+ctx.beginPath();
+ctx.moveTo(0,toCanvasY(0));
+ctx.lineTo(canvas.width,toCanvasY(0));
+ctx.stroke();
+}
+
+// subtle grid dots
+ctx.fillStyle = 'rgba(0,0,0,0.03)';
+const step = 1;
+for(let x=Math.ceil(view.xMin); x<=Math.floor(view.xMax); x+=step){
+for(let y=Math.ceil(view.yMin); y<=Math.floor(view.yMax); y+=step){
+ctx.fillRect(toCanvasX(x)-0.5*DPR, toCanvasY(y)-0.5*DPR, 1*DPR, 1*DPR);
+}
+}
+
+// determine tick interval based on zoom level
+function getTickInterval(range) {
+if (range <= 1) return 0.1;
+if (range <= 2) return 0.5;
+if (range <= 5) return 1;
+if (range <= 10) return 1;
+if (range <= 15) return 2;
+if (range <= 30) return 5;
+if (range <= 60) return 10;
+if (range <= 150) return 20;
+if (range <= 300) return 50;
+
+return 100;
+}
+
+// x-axis tick marks and labels
+if (view.yMin <= 0 && view.yMax >= 0) {
+const xRange = view.xMax - view.xMin;
+const xTickInterval = getTickInterval(xRange);
+ctx.strokeStyle = 'rgba(0,0,0,0.9)';
+ctx.lineWidth = 1 * DPR;
+ctx.fillStyle = 'rgba(0,0,0,0.9)';
+ctx.font = (12*DPR) + 'px sans-serif';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'top';
+const xStart = Math.ceil(view.xMin / xTickInterval) * xTickInterval;
+for(let x=xStart; x<=view.xMax; x+=xTickInterval){
+const px = toCanvasX(x);
+const py = toCanvasY(0);
+ctx.beginPath();
+ctx.moveTo(px, py - 6*DPR);
+ctx.lineTo(px, py + 6*DPR);
+ctx.stroke();
+const label = xTickInterval < 1 ? x.toFixed(1) : String(Math.round(x));
+ctx.fillText(label, px, py + 8*DPR);
+}
+}
+
+// y-axis tick marks and labels
+if (view.xMin <= 0 && view.xMax >= 0) {
+const yRange = view.yMax - view.yMin;
+
+const yTickInterval = getTickInterval(yRange);
+ctx.strokeStyle = 'rgba(0,0,0,0.9)';
+ctx.lineWidth = 1 * DPR;
+ctx.fillStyle = 'rgba(0,0,0,0.9)';
+ctx.font = (12*DPR) + 'px sans-serif';
+ctx.textAlign = 'right';
+ctx.textBaseline = 'middle';
+const yStart = Math.ceil(view.yMin / yTickInterval) * yTickInterval;
+for(let y=yStart; y<=view.yMax; y+=yTickInterval){
+const px = toCanvasX(0);
+const py = toCanvasY(y);
+ctx.beginPath();
+ctx.moveTo(px - 6*DPR, py);
+ctx.lineTo(px + 6*DPR, py);
+ctx.stroke();
+const label = yTickInterval < 1 ? y.toFixed(1) : String(Math.round(y));
+ctx.fillText(label, px - 10*DPR, py);
+}
+}
+
+ctx.restore();
+}  
+
+function plotFunction(func, options = {}) {
+ctx.save();
+ctx.beginPath();
+ctx.lineWidth = (options.lineWidth || 2) * DPR;
+ctx.strokeStyle = options.stroke || 'rgba(124,58,237,0.9)';
+
+const steps = Math.floor(canvas.width / (2*DPR));
+let first = true;
+
+for(let i=0; i<=steps; i++){
+const t = i / steps;
+const x = view.xMin + t*(view.xMax - view.xMin);
+let y = func(x);
+
+if(!isFinite(y) || isNaN(y)) { first = true; continue; }
+
+const cx = toCanvasX(x), cy = toCanvasY(y);
+if(first){ ctx.moveTo(cx, cy); first=false; }
+else ctx.lineTo(cx, cy);
+}
+
+ctx.stroke();
+ctx.restore();
+}
+
+function drawVLine(x, style='rgba(93,177,255,0.9)'){
+ctx.save();
+ctx.beginPath();
+ctx.lineWidth = 2*DPR;
+ctx.strokeStyle = style;
+ctx.moveTo(toCanvasX(x),0);
+ctx.lineTo(toCanvasX(x),canvas.height);
+ctx.stroke();
+ctx.restore();
+}
+
+function drawHLine(y, style='rgba(236,72,153,0.9)'){
+ctx.save();
+ctx.beginPath();
+ctx.lineWidth = 2*DPR;
+ctx.strokeStyle = style;
+ctx.setLineDash([8*DPR, 4*DPR]);
+ctx.moveTo(0,toCanvasY(y));
+ctx.lineTo(canvas.width,toCanvasY(y));
+ctx.stroke();
+ctx.restore();
+}
+
+function drawMarker(x, y, color='rgba(52,211,153,0.95)'){
+ctx.save();
+ctx.beginPath();
+ctx.fillStyle = color;
+ctx.arc(toCanvasX(x), toCanvasY(y), 5*DPR, 0, Math.PI*2);
+ctx.fill();
+ctx.restore();
+
+// Draw dotted line from intersection down to x-axis
+ctx.save();
+ctx.lineWidth = 1.5*DPR;
+ctx.strokeStyle = '#000000';
+ctx.setLineDash([6*DPR, 4*DPR]);
+
+ctx.beginPath();
+ctx.moveTo(toCanvasX(x), toCanvasY(y));
+
+ctx.lineTo(toCanvasX(x), toCanvasY(0));
+ctx.stroke();
+
+ctx.restore();  
+}
+
+/* --- Main Draw Function --- */
+function drawGraph() {
+clearCanvas();
+drawAxes();
+
+const p = state.problem;
+if(!p){
+graphSub.textContent = 'No equation yet';
+return;
+}
+
+graphSub.textContent = p.text;
+
+if(p.type === 'linear') {
+plotFunction(x => p.a*x + p.b, {stroke:'rgba(93,177,255,0.95)'});
+drawHLine(p.c, 'rgba(236,72,153,0.95)');
+if (p.a !== 0) {
+const x0 = (p.c - p.b)/p.a;
+drawMarker(x0, p.c);
+}
+}
+}
+
+/* --- Equation Parsing / Solving --- */
+// --- Fraction helpers ---
+function parseFraction(str) {
+str = str.trim();
+if (/^[+-]?\d+$/.test(str)) return {num: parseInt(str), den: 1};
+if (/^[+-]?\d*\.\d+$/.test(str)) {
+// decimal to fraction
+let f = parseFloat(str);
+let den = 1;
+while (Math.abs(f - Math.round(f)) > 1e-8 && den < 1e6) { f *= 10; den *= 10; }
+return {num: Math.round(f), den};
+}
+const match = str.match(/^([+-]?\d+)\s*\/\s*(\d+)$/);
+if (match) return {num: parseInt(match[1]), den: parseInt(match[2])};
+return null;
+}
+function fracToFloat(frac) { return frac.num / frac.den; }
+function gcd(a, b) { return b ? gcd(b, a % b) : Math.abs(a); }
+function simplifyFrac(frac) {
+let g = gcd(frac.num, frac.den);
+let sign = frac.den < 0 ? -1 : 1;
+return {num: sign * frac.num / g, den: Math.abs(frac.den) / g};
+}
+function fracToString(frac) {
+frac = simplifyFrac(frac);
+if (frac.den === 1) return '' + frac.num;
+return frac.num + '/' + frac.den;
+}
+function addFrac(a, b) { return simplifyFrac({num: a.num * b.den + b.num * a.den, den: a.den * b.den}); }
+
+function subFrac(a, b) { return simplifyFrac({num: a.num * b.den - b.num * a.den, den: a.den * b.den}); }
+function mulFrac(a, b) { return simplifyFrac({num: a.num * b.num, den: a.den * b.den}); }
+function divFrac(a, b) { return simplifyFrac({num: a.num * b.den, den: a.den * b.num}); }
+
+function parseEquation(eqStr) {
+// Enhanced parser supporting:
+// 1. Standard form: ax + b = c
+// 2. Variables on both sides: 2x + 3 = x + 5
+// 3. Rational equations: 2/x = 6x (cross-multiply and solve)
+
+const parts = eqStr.split('=');
+if (parts.length !== 2) return null;
+const lhs = parts[0].trim();
+const rhs = parts[1].trim();
+
+// Extract all unique letters
+const lhsLetters = Array.from(new Set(lhs.replace(/[^a-zA-Z]/g, '')));
+const rhsLetters = Array.from(new Set(rhs.replace(/[^a-zA-Z]/g, '')));
+const allLetters = Array.from(new Set([...lhsLetters, ...rhsLetters]));
+
+if (allLetters.length === 0) {
+	problemText.textContent = 'No variable found. Use a single-letter variable like x.';
+	return null;
+}
+if (allLetters.length !== 1) {
+	problemText.textContent = 'Equation must use exactly one single-letter variable.';
+	return null;
+}
+const variable = allLetters[0];
+
+// Check for repeated variable letters
+const repeatedVarPattern = new RegExp(`${variable}{2,}`);
+if (repeatedVarPattern.test(lhs) || repeatedVarPattern.test(rhs)) {
+
+problemText.textContent = 'Variable must not appear more than once in a row.';
+return null;
+}
+
+// Try to parse as rational equation (with / operator)
+if (lhs.includes('/') || rhs.includes('/')) {
+	const result = parseRationalEquation(lhs, rhs, variable);
+	if (result) return result;
+}
+
+// Parse LHS
+const lhsParsed = parseLinearTerm(lhs, variable);
+if (!lhsParsed) return null;
+
+// Parse RHS
+const rhsParsed = parseLinearTerm(rhs, variable);
+if (!rhsParsed) return null;
+
+// Rearrange: (lhs_a - rhs_a)x = (rhs_b - lhs_b)
+// Standard form: Ax = B where solution x = B/A
+const aFrac = subFrac(lhsParsed.aFrac, rhsParsed.aFrac);
+const bFrac = subFrac(rhsParsed.bFrac, lhsParsed.bFrac);
+
+if (aFrac.num === 0) {
+	problemText.textContent = 'No solution or infinite solutions (degenerate equation).';
+	return null;
+}
+
+const solFrac = divFrac(bFrac, aFrac);
+
+// Use math.js BigNumber when available for precise solution
+let solutionBig = null;
+try{
+	if(window.math){
+		const bn = math.bignumber(solFrac.num);
+		const bd = math.bignumber(solFrac.den);
+		solutionBig = math.divide(bn, bd);
+	}
+}catch(e){ solutionBig = null; }
+
+const solution = solutionBig ? Number(solutionBig.toString()) : fracToFloat(solFrac);
+
+// For graphing, convert fractions to numbers (for canvas drawing) but keep BigNumber for formatting
+const aBig = (window.math ? math.divide(math.bignumber(lhsParsed.aFrac.num), math.bignumber(lhsParsed.aFrac.den)) : null);
+const bBig = (window.math ? math.divide(math.bignumber(lhsParsed.bFrac.num), math.bignumber(lhsParsed.bFrac.den)) : null);
+const cBig = (window.math ? math.divide(math.bignumber(rhsParsed.bFrac.num), math.bignumber(rhsParsed.bFrac.den)) : null);
+
+const a = aBig ? Number(aBig.toString()) : fracToFloat(lhsParsed.aFrac);
+const b = bBig ? Number(bBig.toString()) : fracToFloat(lhsParsed.bFrac);
+const c = cBig ? Number(cBig.toString()) : fracToFloat(rhsParsed.bFrac);
+
+const text = `${fracToString(lhsParsed.aFrac)}${variable} + ${fracToString(lhsParsed.bFrac)} = ${fracToString(rhsParsed.bFrac)}`;
+
+return { type: 'linear', a, b, c, text, solution, variable, aFrac: lhsParsed.aFrac, bFrac: lhsParsed.bFrac, cFrac: rhsParsed.bFrac, solFrac, solutionBig, aBig, bBig, cBig };
+}
+
+function parseLinearTerm(expr, variable) {
+// Parse an expression like "2x + 3" or "2x/3 + 1" or "x" or "5" into {aFrac, bFrac}
+// Returns null if invalid
+
+// Handle fractions with variable: 2c/3 means (2c)/3 = (2/3)c
+// Try pattern: (num)(/)(?!(variable)) first - this catches fractions not attached to variable
+
+// Split by + and - while keeping operators
+const terms = expr.match(/[+-]?[^+-]+/g) || [expr];
+
+let totalAFrac = {num: 0, den: 1};
+let totalBFrac = {num: 0, den: 1};
+
+for (let term of terms) {
+term = term.trim();
+if (!term) continue;
+
+// Check if term contains variable
+if (term.includes(variable)) {
+	// Extract coefficient of variable
+	// Pattern: (optional sign)(digits or fraction)(optional * or space)(variable)
+	const varPattern = new RegExp(`([+-]?(?:\\d+(?:\\/\\d+)?|\\d*(?:\\.\\d+)?)?)?\\s*\\*?\\s*${variable}`, 'i');
+	const match = term.match(varPattern);
+
+	if (match) {
+		let coeff = match[1] || '+';
+		if (coeff === '+' || coeff === '') coeff = '1';
+		else if (coeff === '-') coeff = '-1';
+
+		let coeffFrac = parseFraction(coeff);
+		if (!coeffFrac) coeffFrac = {num: 1, den: 1};
+
+		totalAFrac = addFrac(totalAFrac, coeffFrac);
+
+		// Check for constant after variable (rare but handle 2x/3)
+		const afterVar = term.replace(varPattern, '').trim();
+		if (afterVar && afterVar.startsWith('/')) {
+			const denomStr = afterVar.substring(1).trim();
+			if (denomStr && /^\d+$/.test(denomStr)) {
+				const denom = parseInt(denomStr);
+				totalAFrac = divFrac(totalAFrac, {num: denom, den: 1});
+			}
+		}
+	}
+} else {
+// Constant term
+let constFrac = parseFraction(term);
+if (!constFrac) constFrac = {num: 0, den: 1};
+totalBFrac = addFrac(totalBFrac, constFrac);
+}
+}
+
+return { aFrac: totalAFrac, bFrac: totalBFrac };
+}
+
+function parseRationalEquation(lhs, rhs, variable) {
+// Handle equations like 2/x = 6x or (x+2)/(x-1) = 3
+// Simplified: handle basic fractions with variable in denominator
+// Convert to polynomial and solve
+
+// Try simple case: a/x = b or a/x = bx
+	const simpleFracPattern = new RegExp(`^([+-]?\d+)\s*\/\s*${variable}$`, 'i');
+
+	const lhsMatch = lhs.match(simpleFracPattern);
+	const rhsMatch = rhs.match(simpleFracPattern);
+
+	if (lhsMatch && !rhsMatch) {
+		// Form: a/x = expression
+		const numerator = parseInt(lhsMatch[1]);
+		const rhsParsed = parseLinearTerm(rhs, variable);
+
+		if (!rhsParsed) return null;
+
+		// Cross multiply: a = x * (rhsParsed.aFrac * x + rhsParsed.bFrac)
+		// a = rhsParsed.aFrac * x^2 + rhsParsed.bFrac * x
+		// This is quadratic - for now, handle simple case where rhsParsed.aFrac = 0
+		if (rhsParsed.aFrac.num === 0) {
+			// a = rhsParsed.bFrac * x => x = a / rhsParsed.bFrac
+			const aFrac = {num: numerator, den: 1};
+			const solFrac = divFrac(aFrac, rhsParsed.bFrac);
+			const solution = fracToFloat(solFrac);
+			const text = `${numerator}/${variable} = ${fracToString(rhsParsed.bFrac)}`;
+			return { type: 'linear', a: 0, b: 0, c: 0, text, solution, variable, aFrac, bFrac: rhsParsed.bFrac, cFrac: {num: numerator, den: 1}, solFrac };
+		}
+	}
+
+	return null;
+}
+
+/* --- Problem Generation (removed) ---
+function generateProblem(level){
+let a = randNonZero([-5,-4,-3,-2,-1,1,2,3,4,5]);
+const x = randInt(-6,6);
+const b = randInt(-10,10);
+const c = a*x + b;
+const text = `${a}x + ${b} = ${c}`;
+return {type:'linear', a,b,c,text,solution:[ (c-b)/a ]};
+}
+--- */
+
+/* --- Set Problem / History --- */
+function setProblem(p, opts = { resetView: true }){
+state.problem = p;
+
+// update legend to show the plotted functions: y = ax + b and y = c
+try{
+if(p && p.type === 'linear'){
+legendEq.textContent = formatLinear(p.a, p.b, p.variable || 'x');
+legendRef.textContent = `y = ${roundSmart(p.c)}`;
+if(legendAxis) legendAxis.textContent = 'Axes';
+} else {
+if(legendEq) legendEq.textContent = 'Equation';
+if(legendRef) legendRef.textContent = 'Reference';
+if(legendAxis) legendAxis.textContent = 'Axes';
+}
+} catch(e){ /* ignore if legend elements missing */ }
+
+if(opts.resetView){
+view.xMin=-5; view.xMax=5; view.yMin=-4; view.yMax=4;
+}
+
+drawGraph();
+// persist current state
+saveAppState();
+}
+
+/* --- Answer Checking --- */
+/* --- Answer Checking --- */
+function checkAnswer(){
+	const p = state.problem;
+	const checkResultEl = $('checkResult');
+	const answerInputEl = $('answerInput');
+
+	if(!p){
+		if(checkResultEl) { checkResultEl.textContent='Generate a problem first.'; checkResultEl.style.background=''; }
+		else hintBox.textContent = 'Generate a problem first.';
+		return;
+	}
+
+	const raw = answerInputEl ? answerInputEl.value.trim() : '';
+	if(!raw){ if(checkResultEl) { checkResultEl.textContent='Type your answer first.'; checkResultEl.style.background=''; } else hintBox.textContent='Type your answer first.'; return; }
+
+	if(p.type === 'linear'){
+		const x = parseFloat(raw);
+		if(isNaN(x)){ if(checkResultEl) { checkResultEl.textContent='Enter a numeric answer.'; checkResultEl.style.background=''; } else hintBox.textContent='Enter a numeric answer.'; return; }
+
+		const solution = (p.c - p.b)/p.a;
+		if(approxEqual(x, solution,1e-2)) successFeedback('Correct ✅', `x = ${roundSmart(solution)}`);
+		else { failFeedback('Not quite', `Expected x = ${roundSmart(solution)}`); showStepsLinear(p); }
+	}
+}
+
+function successFeedback(title, detail){
+	const checkResultEl = $('checkResult');
+	if(checkResultEl){
+		checkResultEl.textContent = `${title} ${detail}`;
+		checkResultEl.style.background = 'linear-gradient(90deg,var(--success), rgba(52,211,153,0.2))';
+		checkResultEl.classList.add('pulse');
+		setTimeout(()=>checkResultEl.classList.remove('pulse'), 800);
+	} else {
+		hintBox.textContent = `${title} ${detail}`;
+	}
+	hintBox.textContent = 'Nice! You can explore by panning and zooming.';
+}
+
+function failFeedback(title, detail){
+	const checkResultEl = $('checkResult');
+	if(checkResultEl){
+		checkResultEl.textContent = `${title} ${detail}`;
+		checkResultEl.style.background = 'linear-gradient(90deg,var(--danger), rgba(251,113,133,0.08))';
+	} else {
+		hintBox.textContent = `${title} ${detail}`;
+	}
+	hintBox.textContent = 'Hint: press Show Steps to see a visual breakdown.';
+}
+
+/* --- Step Hints --- */
+function showStepsLinear(p, originalEq){
+	hintBox.innerHTML = '';
+	const v = p.variable || 'x';
+	const steps = [];
+
+	// Format all numbers with smart formatting (prefer BigNumber)
+	const a_fmt = p.aBig ? roundSmart(p.aBig) : roundSmart(p.a);
+	const b_fmt = p.bBig ? roundSmart(p.bBig) : roundSmart(p.b);
+	const c_fmt = p.cBig ? roundSmart(p.cBig) : roundSmart(p.c);
+	const solution_fmt = p.solutionBig ? roundSmart(p.solutionBig) : roundSmart(p.solution);
+
+	if (originalEq && originalEq.trim() !== `${a_fmt}${v} + ${b_fmt} = ${c_fmt}`.replace(/\s+/g, '')) {
+		steps.push(`Original equation: ${originalEq}`);
+		const newB = p.bBig ? roundSmart(math.subtract(p.bBig, p.cBig)) : roundSmart(p.b - p.c);
+		const sign = newB >= 0 ? '+' : '';
+		steps.push(`Rearrange to standard form: ${a_fmt}${v} ${sign} ${newB} = 0`);
+	} else {
+		steps.push(`Given equation: ${a_fmt}${v} + ${b_fmt} = ${c_fmt}`);
+	}
+
+	// Step to isolate variable term
+	const rightSide = p.cBig ? roundSmart(math.subtract(p.cBig, p.bBig)) : roundSmart(p.c - p.b);
+	if ((p.bBig && !math.equal(p.bBig, 0)) || (!p.bBig && p.b !== 0)){
+		const operand = (p.bBig ? (math.larger(p.bBig,0) ? `subtract ${roundSmart(math.abs(p.bBig))}` : `add ${roundSmart(math.abs(p.bBig))}`) : (p.b>0 ? `subtract ${roundSmart(Math.abs(p.b))}` : `add ${roundSmart(Math.abs(p.b))}`));
+		steps.push(`${operand} from both sides: ${a_fmt}${v} = ${rightSide}`);
+	}
+
+	// Isolate variable
+	const a_value = p.solutionBig ? roundSmart(p.solutionBig) : roundSmart(p.solution);
+	if ((p.aBig && !math.equal(p.aBig, 1) && !math.equal(p.aBig, -1)) || (!p.aBig && p.a !== 1 && p.a !== -1)){
+		const divisor = p.aBig ? roundSmart(math.abs(p.aBig)) : roundSmart(Math.abs(p.a));
+		steps.push(`Divide both sides by ${divisor}: ${v} = ${a_value}`);
+	} else if ((p.aBig && math.equal(p.aBig, -1)) || (!p.aBig && p.a === -1)){
+		steps.push(`Multiply both sides by -1: ${v} = ${a_value}`);
+	}
+
+	steps.push(`Solution: ${v} = ${a_value}`);
+
+	// heading
+	const heading = document.createElement('div');
+	heading.textContent = 'Algebraic method';
+	heading.style.fontWeight = 'bold';
+	heading.style.fontSize = '14px';
+	heading.style.marginBottom = '12px';
+	hintBox.appendChild(heading);
+
+	// show animated dots while steps appear
+	const dots = document.createElement('div');
+	dots.className = 'dots';
+	dots.textContent = 'Working';
+	hintBox.appendChild(dots);
+
+	let i = 0;
+	const id = setInterval(()=>{
+		if(i===0){ /* keep dots for a short while */ }
+		if(i>=steps.length){ clearInterval(id); if(dots && dots.parentNode) dots.parentNode.removeChild(dots); return; }
+		const stepDiv = document.createElement('div');
+		stepDiv.textContent = `Step ${i+1}: ${steps[i]}`;
+		stepDiv.style.marginBottom = '8px';
+		stepDiv.style.fontWeight = 'bold';
+		hintBox.appendChild(stepDiv);
+		i++;
+	}, 500);
+
+	// Graphical steps after algebraic ones
+	setTimeout(() => {
+		const graphHeading = document.createElement('div');
+		graphHeading.textContent = 'Graphical method';
+		graphHeading.style.fontWeight = 'bold';
+		graphHeading.style.fontSize = '14px';
+		graphHeading.style.marginTop = '16px';
+		graphHeading.style.marginBottom = '12px';
+		hintBox.appendChild(graphHeading);
+
+		const graphSteps = [
+			`Plot the line y = ${a_fmt}${v} + ${b_fmt}`,
+			`Draw the horizontal line y = ${c_fmt}`,
+			`Find where the two lines intersect`,
+			`Read the x-coordinate of the intersection point`
+		];
+
+		let j = 0;
+		const graphId = setInterval(() => {
+			if(j >= graphSteps.length) { clearInterval(graphId); return; }
+			const stepDiv = document.createElement('div');
+			stepDiv.textContent = `Step ${j+1}: ${graphSteps[j]}`;
+			stepDiv.style.marginBottom = '8px';
+			stepDiv.style.fontWeight = 'bold';
+			hintBox.appendChild(stepDiv);
+			j++;
+		}, 500);
+	}, (steps.length * 500) + 300);
+}
+
+/* --- Slider Updates --- */
+// Parameters sliders removed - no dynamic slider updates
+
+function formatNumber(num) {
+	// Use math.js format for BigNumbers when available
+	try {
+		if (window.math && math.isBigNumber(num)) return math.format(num, {notation:'auto', precision:14});
+	} catch (e) {}
+	if (typeof num === 'string') num = parseFloat(num);
+	if (isNaN(num)) return String(num);
+	// Round to 2 decimal places for normal numbers
+	const rounded = Math.round(num * 100) / 100;
+	return rounded.toFixed(2).replace(/\.?0+$/, '');
+}
+// Overlay helpers: position overlay over canvas
+function showOverlay(){
+	const overlay = $('canvasOverlay');
+	const canvasEl = $('graphCanvas');
+	if(!overlay || !canvasEl) return;
+	const rect = canvasEl.getBoundingClientRect();
+	overlay.style.position = 'absolute';
+	overlay.style.left = rect.left + 'px';
+	overlay.style.top = rect.top + 'px';
+	overlay.style.width = rect.width + 'px';
+	overlay.style.height = rect.height + 'px';
+	overlay.style.display = 'flex';
+}
+function hideOverlay(){
+	const overlay = $('canvasOverlay');
+	if(!overlay) return;
+	overlay.style.display = 'none';
+}
+
+// Load math.js dynamically (BigNumber support)
+(function(){
+	if(!window.math){
+		const s=document.createElement('script');
+		s.src='https://cdn.jsdelivr.net/npm/mathjs@11.8.0/lib/browser/math.js';
+		s.async = true;
+		s.onload = ()=>console.log('math.js loaded');
+		document.head.appendChild(s);
+	}
+})();
+
+solveBtn.addEventListener('click', () => {
+	const eqStr = equationInput.value.trim();
+	if (!eqStr) {
+		problemText.textContent = 'Please enter an equation.';
+		return;
+	}
+
+	// Show canvas loading spinner first and position it over the canvas
+	showOverlay();
+
+	// simulate brief loading so spinner is visible even when fast
+	setTimeout(() => {
+		const p = parseEquation(eqStr);
+		if (!p) {
+			problemText.textContent = 'Invalid format. Use: ax + b = c (e.g., 3x + 2 = 11 or 3f - 5 = 9)';
+			hideOverlay();
+			return;
+		}
+
+		// Display the solution with smart formatting (prefer BigNumber format)
+		const solStr = p.solutionBig ? roundSmart(p.solutionBig) : roundSmart(p.solution);
+		problemText.innerHTML = `<strong>${p.variable} = ${solStr}</strong>`;
+
+		// Set the problem and draw graph (honoring uiMode)
+		setProblem(p, { resetView: true });
+
+		hideOverlay();
+
+		// Show algebraic steps with a loading dots animation first
+		showStepsLinear(p, eqStr);
+	}, 220);
+});
+
+// Allow pressing Enter in the equation input to trigger Solve
+equationInput.addEventListener('keydown', function(e) {
+if (e.key === 'Enter') {
+e.preventDefault();
+
+solveBtn.click();
+}
+});
+
+// --- Numeric Keyboard Logic ---
+let lastSelectedVariable = null;
+if(numKeyboard) {
+numKeyboard.addEventListener('click', function(e) {
+if(e.target.tagName !== 'BUTTON') return;
+let key = e.target.getAttribute('data-key');
+if(!key) return;
+if(key === 'back') {
+// Delete the last character
+const start = equationInput.selectionStart;
+const end = equationInput.selectionEnd;
+const val = equationInput.value;
+if(start > 0 || end > 0) {
+if(start === end) {
+equationInput.value = val.slice(0, start - 1) + val.slice(start);
+equationInput.selectionStart = equationInput.selectionEnd = start - 1;
+} else {
+equationInput.value = val.slice(0, start) + val.slice(end);
+equationInput.selectionStart = equationInput.selectionEnd = start;
+}
+}
+equationInput.focus();
+return;
+}
+if(key === 'var') {
+
+if(lastSelectedVariable) {
+key = lastSelectedVariable;
+} else {
+let v = prompt('Enter a single letter variable (a-z):', 'x');
+if(!v || v.length !== 1 || !/[a-zA-Z]/.test(v)) return;
+lastSelectedVariable = v;
+key = v;
+}
+}
+// Convert × and ÷ to * and / for internal use, but display as entered
+let insertKey = key;
+if(key === '×') insertKey = '*';
+if(key === '÷') insertKey = '/';
+// Insert at cursor position
+const start = equationInput.selectionStart;
+const end = equationInput.selectionEnd;
+const val = equationInput.value;
+equationInput.value = val.slice(0, start) + key + val.slice(end);
+equationInput.selectionStart = equationInput.selectionEnd = start + key.length;
+equationInput.focus();
+});
+}
+
+/* --- Initial --- */
+// Start with empty graph (no equation plotted)
+state.problem = null;
+drawGraph();
+</script>--> 
+</body> 
+</html>
 <style>
 :root {
 --bg:#0f1724;
